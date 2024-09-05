@@ -1,6 +1,8 @@
-# WIMOAD
-WIMOAD: Weighted Integration of Multi-Omics data for Alzheimer’s Disease (AD) Diagnosis
+# WIMOAD: Weighted Integration of Multi-Omics data for Alzheimer’s Disease (AD) Diagnosis
 **WIMOAD** a weighted integration of multi-omics data for AD diagnosis. WIMOAD synergistically leverages specialized classifiers for patients' paired gene expression and methylation data for multi-stage classification.
+
+## Workflow
+![Workflow of WIMOAD](workflow.png)
 
 ## Installation
 this is a test version
