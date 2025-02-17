@@ -84,7 +84,6 @@ def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifi
     #     .reset_index()
     # )
 
-    # # 修改列名，添加 "avg_" 前缀
     # mean_results = mean_results.rename(columns={
     #     'Accuracy': 'avg_Accuracy',
     #     'AUC': 'avg_AUC',
