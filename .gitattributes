@@ -1,4 +1,0 @@
-*.csv filter=lfs diff=lfs merge=lfs -text
-*.zip filter=lfs diff=lfs merge=lfs -text
-exp_exmethy_map_matrix.csv filter=lfs diff=lfs merge=lfs -text
-methl_exmethy_map_matrix.csv.zip filter=lfs diff=lfs merge=lfs -text
