@@ -96,6 +96,8 @@ def build_tasks(config_path=TASK_CONFIG_PATH):
             "group": group,
             "file_e": task_config.get("expression_file", defaults["expression_file"]),
             "file_m": task_config.get("methylation_file", defaults["methylation_file"]),
+            "drop_columns_e": task_config.get("expression_drop_columns", defaults.get("expression_drop_columns")),
+            "drop_columns_m": task_config.get("methylation_drop_columns", defaults.get("methylation_drop_columns")),
             "label_map": task_config["label_map"],
             "classifiers_e": _build_classifiers(task_config["expression"]),
             "classifiers_m": _build_classifiers(task_config["methylation"]),

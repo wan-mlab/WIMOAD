@@ -59,7 +59,7 @@ def run_expression(dataset, meta_models, cv_method, n_splits, n_repeats, output_
     from main import main
 
     print(f"Processing expression group: {dataset['group']}")
-    data, labels = load_data(dataset['file_e'], dataset['label_map'])
+    data, labels = load_data(dataset['file_e'], dataset['label_map'], dataset.get('drop_columns_e'))
     output_filename = output_dir / f"results_{dataset['group']}.csv"
     return main(
         data,
@@ -78,7 +78,7 @@ def run_methylation(dataset, meta_models, cv_method, n_splits, n_repeats, output
     from main import main
 
     print(f"Processing methylation group: {dataset['group']}")
-    data_m, labels_m = load_data_m(dataset['file_m'], dataset['label_map'])
+    data_m, labels_m = load_data_m(dataset['file_m'], dataset['label_map'], dataset.get('drop_columns_m'))
     output_filename_m = output_dir / f"results_m_{dataset['group']}.csv"
     return main(
         data_m,

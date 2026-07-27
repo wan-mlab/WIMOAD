@@ -34,14 +34,14 @@ def _load_dataset(filename, label_map, drop_columns=None):
     return X, y
 
 
-def load_data(filename, label_map):
-    """Load and preprocess the expression dataset."""
-    return _load_dataset(filename, label_map, drop_columns=['DX_bl_nodia', 'DX_bl_dia', 'RID_nodia'])
+def load_data(filename, label_map, drop_columns=None):
+    """Load and preprocess an expression dataset."""
+    return _load_dataset(filename, label_map, drop_columns=drop_columns)
 
 
-def load_data_m(filename, label_map):
-    """Load and preprocess the methylation dataset."""
-    return _load_dataset(filename, label_map)
+def load_data_m(filename, label_map, drop_columns=None):
+    """Load and preprocess a methylation dataset."""
+    return _load_dataset(filename, label_map, drop_columns=drop_columns)
 
 def feature_selection(X_train, y_train, X_val, k=1000):
     """Perform variance thresholding and ANOVA feature selection."""
