@@ -47,18 +47,12 @@ Run a specific branch, CV strategy, and output directory:
 python runner.py --group ca --omics expression --cv KFold --output-dir results
 ```
 
-Generate R3 supplemental McNemar tables from existing result CSV files:
-```bash
-python scripts/make_supplemental_tables.py --help
-```
-
 Core files:
 - `configs/tasks.yaml`: task groups, label maps, and base-model hyperparameters
 - `model_config.py`: meta models and sklearn estimator factories
 - `runner.py`: command-line stacking workflow
 - `wimoad/integration.py`: deterministic weighted omics fusion
 - `wimoad/statistics.py`: exact McNemar utilities
-- `scripts/make_supplemental_tables.py`: supplemental table generation
 
 Run tests after installing development dependencies:
 ```bash
