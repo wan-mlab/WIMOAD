@@ -1,8 +1,6 @@
 # main functions
-from parallel import run_cv_repeat
 from metrics import calculate_metrics
 from joblib import Parallel, delayed
-from model_config import meta_models
 import pandas as pd
 from sklearn.exceptions import UndefinedMetricWarning
 from parallel import run_cv_repeat
@@ -10,8 +8,19 @@ from parallel_loo import run_single_loo_parallel
 import warnings
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
-def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifiers):
+def main(
+    data,
+    labels,
+    output_filename,
+    cv_method,
+    n_splits,
+    n_repeats,
+    classifiers,
+    meta_models_config=None,
+):
     """Main workflow for nested cross-validation with parallel repetitions."""
+    if meta_models_config is None:
+        from model_config import meta_models as meta_models_config
     
     combined_results = []
 
@@ -23,13 +32,21 @@ def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifi
             cv_method=cv_method,
             n_splits=n_splits,
             classifiers=classifiers,
-            meta_models=meta_models
+            meta_models=meta_models_config
     )
         combined_results = all_results
 
     else:
         all_results = Parallel(n_jobs=-1)(
-            delayed(run_cv_repeat)(repeat_idx, data, labels, cv_method, n_splits, classifiers, meta_models)
+            delayed(run_cv_repeat)(
+                repeat_idx,
+                data,
+                labels,
+                cv_method,
+                n_splits,
+                classifiers,
+                meta_models_config,
+            )
             for repeat_idx in range(n_repeats)
         )
         combined_results = [item for sublist in all_results for item in sublist]
@@ -42,7 +59,7 @@ def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifi
             "MetaModel": res["MetaModel"],
             "SampleRID": res["SampleRID"],
             "Prediction": res["Prediction"],
-            "Prediction_f": res["Prediction_f"] if "Prediction_f" in res else 0
+            "Prediction_f": res.get("Prediction_f", pd.NA)
         }
         for res in combined_results
     ]
@@ -56,17 +73,6 @@ def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifi
     merged_df.to_csv(single_sample_filename, index=False)
     print(f"Single sample pred results saved to {single_sample_filename}")
 
-    # average_scores = (
-    #     merged_df.groupby(['SampleRID', 'Combination', 'MetaModel'])[['Prediction', 'Prediction_f']]
-    #     .mean()
-    #     .reset_index()
-    #     .rename(columns={'Prediction': 'Avg_Prediction', 'Prediction_f': 'Avg_Prediction_f'})
-    # )
-
-    # average_filename = output_filename.replace(".csv", "_average_scores.csv")
-    # average_scores.to_csv(average_filename, index=False)
-    # print(f"Average prediction scores saved to {average_filename}")
-
     # Calculate evaluation metrics
     result = (
         merged_df.groupby(['RunID', 'Combination', 'MetaModel'], group_keys=False)
@@ -74,36 +80,12 @@ def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifi
         .reset_index()
     )
 
-    # # Calculate mean evaluation metrics across all RunID
-    # mean_results = (
-    #     result.groupby(['Combination', 'MetaModel'])[
-    #         ['Accuracy', 'AUC', 'F1', 'Recall', 'Precision', 'Specificity', 
-    #         'Accuracy_f', 'AUC_f', 'F1_f', 'Recall_f', 'Precision_f', 'Specificity_f']
-    #     ]
-    #     .mean()
-    #     .reset_index()
-    # )
-
-    # mean_results = mean_results.rename(columns={
-    #     'Accuracy': 'avg_Accuracy',
-    #     'AUC': 'avg_AUC',
-    #     'F1': 'avg_F1',
-    #     'Recall': 'avg_Recall',
-    #     'Precision': 'avg_Precision',
-    #     'Specificity': 'avg_Specificity',
-    #     'Accuracy_f': 'avg_Accuracy_f',
-    #     'AUC_f': 'avg_AUC_f',
-    #     'F1_f': 'avg_F1_f',
-    #     'Recall_f': 'avg_Recall_f',
-    #     'Precision_f': 'avg_Precision_f',
-    #     'Specificity_f': 'avg_Specificity_f'
-    # })
-
     # Calculate mean and standard deviation evaluation metrics across all RunID
     mean_results = (
         result.groupby(['Combination', 'MetaModel'])[
             ['Accuracy', 'AUC', 'F1', 'Recall', 'Precision', 'Specificity', 
-            'Accuracy_f', 'AUC_f', 'F1_f', 'Recall_f', 'Precision_f', 'Specificity_f']
+            'MCC', 'Accuracy_f', 'AUC_f', 'F1_f', 'Recall_f', 'Precision_f',
+            'Specificity_f', 'MCC_f']
         ]
         .agg(['mean', 'std'])
     )
@@ -126,6 +108,8 @@ def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifi
         'std_Precision': 'std_Precision',
         'mean_Specificity': 'avg_Specificity',
         'std_Specificity': 'std_Specificity',
+        'mean_MCC': 'avg_MCC',
+        'std_MCC': 'std_MCC',
         'mean_Accuracy_f': 'avg_Accuracy_f',
         'std_Accuracy_f': 'std_Accuracy_f',
         'mean_AUC_f': 'avg_AUC_f',
@@ -137,7 +121,9 @@ def main(data, labels, output_filename, cv_method, n_splits, n_repeats, classifi
         'mean_Precision_f': 'avg_Precision_f',
         'std_Precision_f': 'std_Precision_f',
         'mean_Specificity_f': 'avg_Specificity_f',
-        'std_Specificity_f': 'std_Specificity_f'
+        'std_Specificity_f': 'std_Specificity_f',
+        'mean_MCC_f': 'avg_MCC_f',
+        'std_MCC_f': 'std_MCC_f'
     })
 
     # Save the detailed evaluation metrics (per RunID) to a CSV

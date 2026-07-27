@@ -1,0 +1,191 @@
+defaults:
+  expression_file: exp_exmethy_map_matrix.csv
+  methylation_file: methl_exmethy_map_matrix.csv
+
+task_order:
+  - ae
+  - al
+  - am
+  - ca
+  - ce
+  - cl
+  - cm
+  - cp
+  - el
+
+tasks:
+  ae:
+    label_map:
+      - 1: 5
+        2: 1
+    expression:
+      RandomForest: {max_depth: 10, n_estimators: 10}
+      SVM: {C: 0.01, kernel: linear}
+      LogisticRegression: {C: 0.1}
+      MLP: {hidden_layer_sizes: [50, 50, 50], alpha: 0.001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 10, n_estimators: 100}
+      SVM: {C: 1, kernel: rbf}
+      LogisticRegression: {C: 0.01}
+      MLP: {hidden_layer_sizes: [50, 50, 50], alpha: 0.001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}
+
+  al:
+    label_map:
+      - 1: 5
+        3: 1
+    expression:
+      RandomForest: {max_depth: null, n_estimators: 10}
+      SVM: {C: 10, kernel: poly}
+      LogisticRegression: {C: 1000}
+      MLP: {max_iter: 1000, hidden_layer_sizes: [50], alpha: 0.0001}
+      KNN: {n_neighbors: 3}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 20, n_estimators: 10}
+      SVM: {C: 0.1, kernel: linear}
+      LogisticRegression: {C: 0.01}
+      MLP: {max_iter: 1000, hidden_layer_sizes: [50, 50, 50], alpha: 0.0001}
+      KNN: {n_neighbors: 7}
+      NaiveBayes: {}
+
+  am:
+    label_map:
+      - 1: 5
+        2: 1
+        3: 1
+    expression:
+      RandomForest: {max_depth: null, n_estimators: 10}
+      SVM: {C: 0.01, kernel: poly}
+      LogisticRegression: {C: 0.01}
+      MLP: {hidden_layer_sizes: [50, 50, 50], alpha: 0.001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: null, n_estimators: 10}
+      SVM: {C: 100, kernel: rbf}
+      LogisticRegression: {C: 1000}
+      MLP: {hidden_layer_sizes: [50], alpha: 0.001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}
+
+  ca:
+    label_map:
+      - 0: 0
+        1: 1
+    expression:
+      RandomForest: {max_depth: 10, n_estimators: 50}
+      SVM: {C: 1000, kernel: rbf}
+      LogisticRegression: {max_iter: 1000, C: 1}
+      MLP: {hidden_layer_sizes: [50, 50], alpha: 0.0001}
+      KNN: {n_neighbors: 3}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 10, n_estimators: 10}
+      SVM: {C: 10, kernel: poly}
+      LogisticRegression: {C: 1000}
+      MLP: {hidden_layer_sizes: [50, 50, 50], alpha: 0.0001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}
+
+  ce:
+    label_map:
+      - 0: 5
+        2: 0
+    expression:
+      RandomForest: {max_depth: 20, n_estimators: 10}
+      SVM: {C: 0.01, kernel: linear}
+      LogisticRegression: {C: 1000}
+      MLP: {hidden_layer_sizes: [50], alpha: 0.001}
+      KNN: {n_neighbors: 3}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 10, n_estimators: 10}
+      SVM: {C: 1, kernel: linear}
+      LogisticRegression: {C: 1000}
+      MLP: {hidden_layer_sizes: [50, 50, 50], alpha: 0.001}
+      KNN: {n_neighbors: 3}
+      NaiveBayes: {}
+
+  cl:
+    label_map:
+      - 0: 5
+        3: 0
+        1: 1
+    expression:
+      RandomForest: {max_depth: 10, n_estimators: 10}
+      SVM: {C: 100, kernel: rbf}
+      LogisticRegression: {C: 100}
+      MLP: {hidden_layer_sizes: [50, 50], alpha: 0.0001}
+      KNN: {n_neighbors: 7}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 20, n_estimators: 10}
+      SVM: {C: 0.01, kernel: rbf}
+      LogisticRegression: {C: 0.01}
+      MLP: {hidden_layer_sizes: [100], alpha: 0.001}
+      KNN: {n_neighbors: 7}
+      NaiveBayes: {}
+
+  cm:
+    label_map:
+      - 0: 6
+        2: 0
+        3: 0
+    expression:
+      RandomForest: {max_depth: 10, n_estimators: 50}
+      SVM: {C: 10, kernel: poly}
+      LogisticRegression: {C: 1000}
+      MLP: {hidden_layer_sizes: [100], alpha: 0.001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 20, n_estimators: 10}
+      SVM: {C: 1, kernel: linear}
+      LogisticRegression: {C: 1000}
+      MLP: {hidden_layer_sizes: [100], alpha: 0.001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}
+
+  cp:
+    label_map:
+      - 2: 0
+        3: 0
+    expression:
+      RandomForest: {max_depth: 20, n_estimators: 100}
+      SVM: {C: 0.01, kernel: linear}
+      LogisticRegression: {C: 100}
+      MLP: {hidden_layer_sizes: [50, 50], alpha: 0.001}
+      KNN: {n_neighbors: 3}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 10, n_estimators: 50}
+      SVM: {C: 0.01, kernel: poly}
+      LogisticRegression: {C: 0.01}
+      MLP: {hidden_layer_sizes: [50, 50, 50], alpha: 0.001}
+      KNN: {n_neighbors: 3}
+      NaiveBayes: {}
+
+  el:
+    label_map:
+      - 1: 5
+        0: 6
+        2: 0
+        3: 1
+    expression:
+      RandomForest: {max_depth: 10, n_estimators: 10}
+      SVM: {C: 10, kernel: poly}
+      LogisticRegression: {C: 1000}
+      MLP: {hidden_layer_sizes: [50], alpha: 0.001}
+      KNN: {n_neighbors: 3}
+      NaiveBayes: {}
+    methylation:
+      RandomForest: {max_depth: 20, n_estimators: 10}
+      SVM: {C: 0.1, kernel: rbf}
+      LogisticRegression: {C: 0.01}
+      MLP: {hidden_layer_sizes: [50, 50, 50], alpha: 0.001}
+      KNN: {n_neighbors: 5}
+      NaiveBayes: {}

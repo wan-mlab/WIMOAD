@@ -1,0 +1,19 @@
+.DS_Store
+__pycache__/
+.pytest_cache/
+
+# Local access-controlled input data
+exp_exmethy_map_matrix.csv
+methl_exmethy_map_matrix.csv
+methl_exmethy_map_matrix.csv.zip
+
+# Generated outputs
+results/
+r3_outputs/
+*_single_samples.csv
+*_evaluation_metrics.csv
+*_mean_evaluation_metrics.csv
+
+# Local documentation artifacts
+Integration.ipynb
+workflow.png

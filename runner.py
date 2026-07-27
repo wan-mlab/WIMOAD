@@ -1,42 +1,119 @@
-# runner
+"""Command-line runner for WIMOAD stacking experiments."""
 
+import argparse
+from pathlib import Path
 import time
-from data_loader import load_data, load_data_m
-from model_config import datasets
-from main import main
+
 
 def format_time(seconds):
     minutes, seconds = divmod(seconds, 60)
     return f"{int(minutes)}m {int(seconds)}s"
 
-if __name__ == "__main__":
+
+def parse_args(argv=None):
+    from model_config import TASK_ORDER
+
+    parser = argparse.ArgumentParser(
+        description="Run WIMOAD stacking for one or more configured task groups."
+    )
+    parser.add_argument(
+        "--group",
+        default="ca",
+        choices=["all", *TASK_ORDER],
+        help="Task group to run. Use 'all' for every configured group.",
+    )
+    parser.add_argument(
+        "--omics",
+        default="both",
+        choices=["expression", "methylation", "both"],
+        help="Omics branch to run.",
+    )
+    parser.add_argument(
+        "--cv",
+        default="LOO",
+        choices=["LOO", "KFold"],
+        help="Cross-validation strategy.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory where result CSV files will be written.",
+    )
+    parser.add_argument(
+        "--n-splits",
+        type=int,
+        default=5,
+        help="Number of splits for KFold runs.",
+    )
+    parser.add_argument(
+        "--n-repeats",
+        type=int,
+        default=None,
+        help="Number of repeated KFold runs. Defaults to 1 for LOO and 10 for KFold.",
+    )
+    return parser.parse_args(argv)
+
+
+def run_expression(dataset, meta_models, cv_method, n_splits, n_repeats, output_dir):
+    from data_loader import load_data
+    from main import main
+
+    print(f"Processing expression group: {dataset['group']}")
+    data, labels = load_data(dataset['file_e'], dataset['label_map'])
+    output_filename = output_dir / f"results_{dataset['group']}.csv"
+    return main(
+        data,
+        labels,
+        str(output_filename),
+        cv_method=cv_method,
+        n_splits=n_splits,
+        n_repeats=n_repeats,
+        classifiers=dataset['classifiers_e'],
+        meta_models_config=meta_models,
+    )
+
+
+def run_methylation(dataset, meta_models, cv_method, n_splits, n_repeats, output_dir):
+    from data_loader import load_data_m
+    from main import main
+
+    print(f"Processing methylation group: {dataset['group']}")
+    data_m, labels_m = load_data_m(dataset['file_m'], dataset['label_map'])
+    output_filename_m = output_dir / f"results_m_{dataset['group']}.csv"
+    return main(
+        data_m,
+        labels_m,
+        str(output_filename_m),
+        cv_method=cv_method,
+        n_splits=n_splits,
+        n_repeats=n_repeats,
+        classifiers=dataset['classifiers_m'],
+        meta_models_config=meta_models,
+    )
+
+
+def run(args):
+    from model_config import get_datasets, meta_models
+
     start_time = time.time()
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    n_repeats = args.n_repeats if args.n_repeats is not None else (1 if args.cv == "LOO" else 10)
 
-    for dataset in datasets:
-        # for selected dataset
-        print(f"Processing group: {dataset['group']}")
-        data, labels = load_data(dataset['file_e'], dataset['label_map'])
-        classifiers = dataset['classifiers_e']
-        output_filename = f"results_{dataset['group']}.csv"
+    for dataset in get_datasets(args.group):
+        if args.omics in {"expression", "both"}:
+            run_expression(
+                dataset, meta_models, args.cv, args.n_splits, n_repeats, output_dir
+            )
 
-        # cv_method = "KFold"
-        cv_method = "LOO"
-        n_repeats = 1 if cv_method == "LOO" else 10
+        if args.omics in {"methylation", "both"}:
+            run_methylation(
+                dataset, meta_models, args.cv, args.n_splits, n_repeats, output_dir
+            )
 
-        single_pred, evaluation, mean_evaluation = main(
-            data, labels, output_filename,
-            cv_method=cv_method, n_splits=5, n_repeats=n_repeats, classifiers=classifiers
-        )
-        # Uncomment the following for methylation group processing if needed
-        print(f"Processing methylation group: {dataset['group']}")
-        data_m, labels_m = load_data_m(dataset['file_m'], dataset['label_map'])
-        classifiers = dataset['classifiers_m']
-        output_filename_m = f"results_m_{dataset['group']}.csv"
-        single_pred, evaluation, mean_evaluation = main(
-            data_m, labels_m, output_filename_m,
-            cv_method=cv_method, n_splits=5, n_repeats=n_repeats, classifiers=classifiers
-        )
-
-    end_time = time.time()
-    elapsed_time = end_time - start_time
+    elapsed_time = time.time() - start_time
     print(f"Running time: {format_time(elapsed_time)}")
+
+
+if __name__ == "__main__":
+    run(parse_args())
